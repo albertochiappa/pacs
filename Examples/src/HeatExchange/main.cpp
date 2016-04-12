@@ -41,6 +41,7 @@ int main(int argc, char** argv)
       printHelp();
       return 0;
     }
+    
   // check if we want verbosity
   bool verbose=cl.search(1,"-v");
   // Get file with parameter values
@@ -53,6 +54,7 @@ int main(int argc, char** argv)
   // to show a possible  use of references)
   const int&    itermax= param.itermax;   //max number of iteration for Gauss-Siedel
   const double& toler=param.toler;   // Tolerance for stopping criterion
+  const int& useL2norm=param.useL2norm; // Norm used to compare increment between iterations
   // Here I use auto (remember that you need const and & if you want constant references)
   const auto& L= param.L;  // Bar length
   const auto& a1=param.a1; // First longitudinal dimension
@@ -62,7 +64,7 @@ int main(int argc, char** argv)
   const auto& k=param.k;  // Thermal conductivity
   const auto& hc=param.hc; // Convection coefficient
   const auto&    M=param.M; // Number of grid elements
-  
+  const auto& outname=param.outname; // Name of the output
   //! Precomputed coefficient for adimensional form of equation
   const auto act=2.*(a1+a2)*hc*L*L/(k*a1*a2);
 
@@ -77,7 +79,7 @@ int main(int argc, char** argv)
   
   for(unsigned int m=0;m <= M;++m)
      theta[m]=(1.-m*h)*(To-Te)/Te;
-  
+  /*
   // Gauss-Seidel
   // epsilon=||x^{k+1}-x^{k}||
   // Stopping criteria epsilon<=toler
@@ -111,6 +113,96 @@ int main(int argc, char** argv)
 	  "||dx||="<<sqrt(epsilon)<<endl;
 	status=1;
       }
+ */
+ if(useL2norm){
+   // Gauss-Seidel
+  // epsilon=sqrt(int((x^{k+1}-x^{k})^2) (a first order approximation of L2 norm has been used)
+  // Stopping criteria epsilon<=toler
+  
+  int iter=0;
+  double xnew, epsilon;
+     do
+       { epsilon=0.;
+
+	 // first M-1 row of linear system
+         for(int m=1;m < M;m++)
+         {   
+	   xnew  = (theta[m-1]+theta[m+1])/(2.+h*h*act);
+	   
+	   //internal nodes have weight h
+	   epsilon += h*(xnew-theta[m])*(xnew-theta[m]);
+	   theta[m] = xnew;
+         }
+
+	 //Last row
+	 xnew = theta[M-1]; 
+	 
+	 //last node has weight h/2
+	 epsilon += h/2*(xnew-theta[M])*(xnew-theta[M]);
+	 theta[M]=  xnew; 
+
+	 iter=iter+1;     
+       }while((sqrt(epsilon) > toler) && (iter < itermax) );
+
+    if(iter<itermax)
+      cout << "M="<<M<<"  Convergence in "<<iter<<" iterations"<<endl;
+    else
+      {
+	cerr << "NOT CONVERGING in "<<itermax<<" iterations "<<
+	  "||dx||="<<sqrt(epsilon)<<endl;
+	status=1;
+      }
+ } else {
+ 
+ // Gauss-Seidel
+  // epsilon=sqrt(int((x^{k+1}-x^{k})^2+int((x'^{k+1}-x'^{k})^2) (a first order approximation of H1 norm has been used)
+  // Stopping criteria epsilon<=toler
+  
+  int iter=0;
+  double epsilon;
+  auto theta_prov=theta;
+     do
+       { epsilon=0.;
+
+	 // first M-1 row of linear system
+         for(int m=1;m < M;m++)
+         {   
+	   theta_prov[m]  = (theta_prov[m-1]+theta_prov[m+1])/(2.+h*h*act);
+	   
+	   //internal nodes have weight h
+	   epsilon += h*(theta_prov[m]-theta[m])*(theta_prov[m]-theta[m]);
+         }
+
+	 //Last row
+	 theta_prov[M] = theta[M-1]; 
+	//last node has weight h/2
+	 epsilon += h/2*(theta_prov[M]-theta[M])*(theta_prov[M]-theta[M]);
+	  
+	 
+	 // computation of gradient
+	 std::vector<double> der(M);
+	 for(int i=0; i<M; ++i){
+	 	der[i] = ((theta_prov[i+1]-theta_prov[i])-(theta[i+1]-theta[i]))/h;
+	 	}
+	 // using rectangle quadrature formula
+	          
+	 // all medium points have weight h
+	 for(int m=0;m<M;++m){
+	 	epsilon+=h*der[m]*der[m];
+	 	}
+	 theta=theta_prov;
+	 iter=iter+1;
+       }while((sqrt(epsilon) > toler) && (iter < itermax) );
+
+    if(iter<itermax)
+      cout << "M="<<M<<"  Convergence in "<<iter<<" iterations"<<endl;
+    else
+      {
+	cerr << "NOT CONVERGING in "<<itermax<<" iterations "<<
+	  "||dx||="<<sqrt(epsilon)<<endl;
+	status=1;
+      }
+ }
 
  // Analitic solution
 
@@ -126,8 +218,9 @@ int main(int argc, char** argv)
      std::vector<double> sol(M+1);
      std::vector<double> exact(M+1);
 
-     cout<<"Result file: result.dat"<<endl;
-     ofstream f("result.dat");
+     cout<<"Result file: "<<outname<<endl;
+     //const char* outname="result.dat";
+     ofstream f(outname);
      for(int m = 0; m<= M; m++)
        {
 	 // \t writes a tab 

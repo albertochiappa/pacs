@@ -1,14 +1,19 @@
 #ifndef HH_Parameters_HH
 #define HH_Parameters_HH
 #include <iosfwd>
+#include <string>
 struct parameters
 {
   //! max number of iteration for Gauss-Siedel
   int   itermax;
   //! Tolerance for stopping criterion
   double  toler;
+  //! Select the norm used to evaluate the increment 
+  //! for the stopping criterion: 1 for L2 norm, 0 
+  //! for H1 norm
+  int useL2norm;
   //! Bar length
-   double L;
+  double L;
   //! First longitudinal dimension
   double a1;
  //! Second longitudinal dimension
@@ -23,10 +28,13 @@ struct parameters
   double hc;
   //! Number of elements
   int M;
+  //! Name of the output file
+  std::string outname;
   //! Constructor takes default values
   parameters():
     itermax(1000000),
     toler(1e-8),
+    useL2norm(1),
     L(40.),
     a1(4.),
     a2(50.),
@@ -34,7 +42,8 @@ struct parameters
     Te(20.),
     k(0.164),
     hc(1.e-6*200.),
-    M(100)
+    M(100),
+    outname("result.dat")
   {}
 };
 //! Prints parameters
