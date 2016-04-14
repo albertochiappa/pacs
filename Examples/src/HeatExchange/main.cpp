@@ -73,12 +73,34 @@ int main(int argc, char** argv)
   
   // Solution vector
   std::vector<double> theta(M+1);
+     
+  // Thomas algorithm for tridiagonal matrices
   
-  // Gauss Siedel is initialised with a linear variation
-  // of T
+  // Explicitly creating the matrix: as it is tridiagonal it is
+  // possible to store it in 3 vectors, in order to save mamory
+  // and to have an efficient code
   
-  for(unsigned int m=0;m <= M;++m)
-     theta[m]=(1.-m*h)*(To-Te)/Te;
+  std::vector<double> a(M,2.+h*h*act),b(M-1,-1.),c(M-1,-1.);
+  a[M-1]=1.;
+  // LU decomposing the matrix. The result will be stored in 
+  // the vectors of the matrix (to save memory)
+  for(int m=0; m<M-1; ++m){
+  	c[m]=c[m]/a[m];
+  	a[m+1]-=b[m]*c[m];
+  		}
+  // Solving the system
+  std::vector <double> y(M);
+  y[0]=To-Te;
+  for(int m=0;m<M-1;++m){
+  	y[m+1]=-c[m]*y[m];
+  	}
+  theta[0]=To-Te;
+  theta[M]=y[M-1]/a[M-1];
+  for(int m=M-1;m>0;--m){
+  	theta[m]=(y[m-1]-b[m-1]*theta[m+1])/a[m-1];
+  		}
+  
+  	
   /*
   // Gauss-Seidel
   // epsilon=||x^{k+1}-x^{k}||
@@ -114,7 +136,7 @@ int main(int argc, char** argv)
 	status=1;
       }
  */
- if(useL2norm){
+ /*if(useL2norm){
    // Gauss-Seidel
   // epsilon=sqrt(int((x^{k+1}-x^{k})^2) (a first order approximation of L2 norm has been used)
   // Stopping criteria epsilon<=toler
@@ -202,7 +224,7 @@ int main(int argc, char** argv)
 	  "||dx||="<<sqrt(epsilon)<<endl;
 	status=1;
       }
- }
+ }*/
 
  // Analitic solution
 
@@ -224,11 +246,13 @@ int main(int argc, char** argv)
      for(int m = 0; m<= M; m++)
        {
 	 // \t writes a tab 
-         f<<m*h*L<<"\t"<<Te*(1.+theta[m])<<"\t"<<thetaa[m]<<endl;
+         //f<<m*h*L<<"\t"<<Te*(1.+theta[m])<<"\t"<<thetaa[m]<<endl;
+         f<<m*h*L<<"\t"<<theta[m]+Te<<"\t"<<thetaa[m]<<endl;
 	 // An example of use of tie and tuples!
          
 	 std::tie(coor[m],sol[m],exact[m])=
-	   std::make_tuple(m*h*L,Te*(1.+theta[m]),thetaa[m]);
+	   //std::make_tuple(m*h*L,Te*(1.+theta[m]),thetaa[m]);
+	   std::make_tuple(m*h*L,theta[m]+Te,thetaa[m]);
        }
      // Using temporary files (another nice use of tie)
      gp<<"plot"<<gp.file1d(std::tie(coor,sol))<<
