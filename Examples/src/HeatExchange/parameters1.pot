@@ -23,4 +23,4 @@ hc=200.0e-6
 # Number of elements
 M=11
 # Name of the output
-outname=result.dat
+outname=result1.dat
