@@ -5,7 +5,7 @@ itermax=1000000
 # Tolerance for stopping criterion
 toler=1.0e-8
 # Norm used to computed the increment (1 for L2 norm, 0 for H1 norm)
-useL2norm=1
+useL2norm=0
 # Bar length
 L=40.
 # First longitudinal dimension
