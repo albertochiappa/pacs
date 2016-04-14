@@ -174,7 +174,7 @@ int main(int argc, char** argv)
          }
 
 	 //Last row
-	 theta_prov[M] = theta[M-1]; 
+	 theta_prov[M] = theta_prov[M-1]; 
 	//last node has weight h/2
 	 epsilon += h/2*(theta_prov[M]-theta[M])*(theta_prov[M]-theta[M]);
 	  
