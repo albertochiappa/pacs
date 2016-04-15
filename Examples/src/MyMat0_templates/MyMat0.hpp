@@ -62,9 +62,9 @@ namespace LinearAlgebra{
      * In alternative I might have used a smart pointer, in particular
      * std::unique_ptr<T>.
      */
+    std::vector<T> data;
     //! The other storage system 
     static constexpr StoragePolicySwitch otherPolicy = storagePolicy == ROWMAJOR? COLUMNMAJOR : ROWMAJOR;
-    std::vector<T> data;
     /*!
       \defgroup getIndex Functions returning index according to ordering
       
@@ -79,23 +79,26 @@ namespace LinearAlgebra{
       @{
 
      */
-    size_type getIndex(size_type const & i, size_type const & j, StorageType<ROWMAJOR>) const
+    size_type getIndex(size_type const i, size_type const j, StorageType<ROWMAJOR>) const
     {
       return j + i*nc;
     }
-    size_type getIndex(size_type const & i, size_type const & j, StorageType<COLUMNMAJOR>) const
+    size_type getIndex(size_type const i, size_type const j, StorageType<COLUMNMAJOR>) const
     {
       return i + j*nr;
     }
     /*!
       @}
     */
+  public:
     //! It uses the one selected by the second argument.
-    size_type getIndex(size_type const & i, size_type const & j) const
+    /*
+      Made public to be able to do faster operations on indexes
+     */
+    size_type getIndex(size_type const i, size_type const j) const
     {
       return getIndex(i,j,StorageType<storagePolicy>());
     }
-  public:
     //! I expose the type of the elements
     using value_type=T;
     //! It builds a matrix with n rows and m columns.
@@ -138,7 +141,7 @@ namespace LinearAlgebra{
     /*!
       It allows a=m(1,1) on constant matrix m
      */
-    T operator () (const size_type i, const size_type j) const
+    T const & operator () (const size_type i, const size_type j) const
     {
     	return data[getIndex(i,j)];
     }
@@ -155,12 +158,20 @@ namespace LinearAlgebra{
     {
       return storagePolicy;
     }
+    /*! \defgroup Norms Various matrix norms
+      The return type is a double. However I can make it better
+      by use of type traits.
+      Need specialization for matrix of complex numbers.
+      They make sense only if T has sensible arithmetic operators.
+      @{
+    */
     //! Computes \f$ ||A||_\infty \f$
-    T normInf() const;
+    double normInf() const;
     //! Computes \f$ ||A||_1 \f$
-    T norm1() const;
+    double norm1() const;
     //! Computes Frobenious norm
-    T normF() const;
+    double normF() const;
+    /*! @} */
     //! Generates a random matrix
     /*!
      * It fills the matrix with random numbers in [0,1)
@@ -176,6 +187,26 @@ namespace LinearAlgebra{
       @param v vector to be multiplied. It must have size()>=nc (no check is made)
      */  
     void vecMultiply(const std::vector<T> &v, std::vector<T> & res) const;
+    //! Iterator to the begin of the internal structure
+    /*! 
+      To be used for fast operation on the data
+     */
+    auto begin() -> decltype(data.begin()) {return data.begin();}
+    //! Iterator to the begin of the internal structure
+    /*! 
+      To be used for fast operation on the data
+     */
+    auto cbegin() const -> decltype(data.cbegin()) {return data.cbegin();}
+    //! Iterator to the end of the internal structure
+    /*! 
+      To be used for fast operation on the data
+     */
+    auto end() -> decltype(data.end()) {return data.end();}
+    //! Iterator to the end of the internal structure
+    /*! 
+      To be used for fast operation on the data
+     */
+    auto cend() const -> decltype(data.cend()) {return data.cend();}
     //! It shows matrix content
     /*!
      *  It pretty prints the matrix
@@ -256,12 +287,12 @@ namespace LinearAlgebra{
   }
   
   template<class T, StoragePolicySwitch storagePolicy>
-  T MyMat0<T,storagePolicy>::normInf() const{
+  double MyMat0<T,storagePolicy>::normInf() const{
     if(nr*nc==0)return 0;
-    T vmax(0);
+    double vmax(0.);
     
     for (size_type i=0;i<nr;++i){
-      T vsum=0;
+      double vsum=0;
       for (size_type j=0;j<nc;++j) vsum+=data[getIndex(i,j)];
       vmax=std::max(vsum,vmax);
     }
@@ -269,11 +300,11 @@ namespace LinearAlgebra{
   }
   
   template<class T, StoragePolicySwitch storagePolicy>
-  T MyMat0<T,storagePolicy>::norm1() const{
+  double MyMat0<T,storagePolicy>::norm1() const{
     if(nr*nc==0)return 0;
-    T vmax(0);
+    double vmax(0);
     for (size_type j=0;j<nc;++j){
-      T vsum=0;
+      double vsum=0;
       for (size_type i=0;i<nr;++i) vsum+=data[getIndex(i,j)];
       vmax=std::max(vsum,vmax);
     }
@@ -281,9 +312,9 @@ namespace LinearAlgebra{
   }
   
   template<class T, StoragePolicySwitch storagePolicy>
-  T MyMat0<T,storagePolicy>::normF() const{
+  double MyMat0<T,storagePolicy>::normF() const{
     if(nr*nc==0)return 0.0;
-    T vsum{0.0};
+    double vsum{0.0};
     for (auto const x: data) vsum+=x*x;
     return std::sqrt(vsum);
   }
@@ -320,7 +351,7 @@ namespace LinearAlgebra{
       double rmax=static_cast<double>(RAND_MAX+2.0);
     std::srand(seed);
     if(nr*nc>0)
-      for (auto& x: data) x=static_cast<double>(std::rand()+1)/rmax;
+      for (auto& x: data) x=static_cast<T>((std::rand()+1)/rmax);
   }
   
   
@@ -336,7 +367,7 @@ namespace LinearAlgebra{
 	out<<std::endl;
     }
   }
-
+  
   template<class T, StoragePolicySwitch storagePolicy>
   std::vector<T> operator * (MyMat0<T, storagePolicy> const & m,std::vector<T> const & v)
   {
@@ -344,7 +375,7 @@ namespace LinearAlgebra{
     m.vecMultiply(v,tmp);
     return tmp;
   }
-
+  
 }
 
 

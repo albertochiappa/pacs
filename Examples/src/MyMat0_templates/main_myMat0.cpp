@@ -46,12 +46,13 @@ int main()
   std::cout<<*(res.end()-1)<<"]"<<std::endl<<std::endl;
   std::cout<<"Norm1, NOrmInf and NormF of a: "<<a.norm1()<<" "<<a.normInf()<<" "<<a.normF()<<std::endl;
 
+  // Testing different implementation of matrix/matrix
   // Creating 2 big matrices
   //MyMat0<double,COLUMNMAJOR> A(1000,1000);
-  MyMat0<double,ROWMAJOR> A(1000,5000);
+  MyMat0<double,ROWMAJOR> A(1024,2048);
   A.fillRandom();
   //  MyMat0<double,COLUMNMAJOR> B(1000,1000);
-  MyMat0<double,ROWMAJOR> B(5000,500);
+  MyMat0<double,ROWMAJOR> B(2048,1024);
   B.fillRandom();
   Timings::Chrono watch;
   std::cout<< "Standard Matrix Moltiplication"<<"\n";
@@ -67,4 +68,13 @@ int main()
   double t2=watch.wallTime();
   std::cout<<watch<<std::endl;
   std::cout<<"Gain: "<<100*(t1-t2)/t1<<"%"<<std::endl;
+  std::cout<<"Speedup: "<<t1/t2<<std::endl;
+  std::cout<< " Blas Optimized Matrix Moltiplication"<<"\n";
+  watch.start();
+  res2=matMulOptBlas(A,B);
+  watch.stop();
+  t2=watch.wallTime();
+  std::cout<<watch<<std::endl;
+  std::cout<<"Gain: "<<100*(t1-t2)/t1<<"%"<<std::endl;
+  std::cout<<"Speedup: "<<t1/t2<<std::endl;
 }
