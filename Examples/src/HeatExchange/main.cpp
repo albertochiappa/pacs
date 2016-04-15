@@ -69,30 +69,41 @@ int main(int argc, char** argv)
   const auto act=2.*(a1+a2)*hc*L*L/(k*a1*a2);
 
   // mesh size
-  const auto h=1./M;
-  
-  // Solution vector
-  std::vector<double> theta(M+1);
+  const auto h=L/M;
+
      
   // Thomas algorithm for tridiagonal matrices
   
   // Explicitly creating the matrix: as it is tridiagonal it is
-  // possible to store it in 3 vectors, in order to save mamory
+  // possible to store it in 3 vectors, in order to save memory
   // and to have an efficient code
   
-  std::vector<double> a(M,2.+h*h*act),b(M-1,-1.),c(M-1,-1.);
+  const double T=1.;
+  const int Nt=10.;
+  const double dt=T/Nt;
+  const double Tinit=Te;
+  const double hp=2.*hc*(a1+a2)/(a1*a2);
+  std::vector<double> a(M,1+dt*hp-2.*k*dt/(h*h)),b(M-1,k*dt/(h*h)),c(M-1,k*dt/(h*h));
   a[M-1]=1.;
+  b[M-1]=-1.;
   // LU decomposing the matrix. The result will be stored in 
   // the vectors of the matrix (to save memory)
   for(int m=0; m<M-1; ++m){
   	c[m]=c[m]/a[m];
   	a[m+1]-=b[m]*c[m];
-  		}
+  		}		
+    
+  // Solution vector
+  std::vector<double> theta(M+1,Tinit);
+  for(int i=0;i<Nt;i++){
+  // Adjusting theta to solve the system
+  theta[0]-=(To-Te)*k*dt/(h*h);
+  theta[M]=0;
   // Solving the system
   std::vector <double> y(M);
-  y[0]=To-Te;
+  y[0]=theta[0];
   for(int m=0;m<M-1;++m){
-  	y[m+1]=-c[m]*y[m];
+  	y[m+1]=theta[m+1]-c[m]*y[m];
   	}
   theta[0]=To-Te;
   theta[M]=y[M-1]/a[M-1];
@@ -100,132 +111,6 @@ int main(int argc, char** argv)
   	theta[m]=(y[m-1]-b[m-1]*theta[m+1])/a[m-1];
   		}
   
-  	
-  /*
-  // Gauss-Seidel
-  // epsilon=||x^{k+1}-x^{k}||
-  // Stopping criteria epsilon<=toler
-  
-  int iter=0;
-  double xnew, epsilon;
-     do
-       { epsilon=0.;
-
-	 // first M-1 row of linear system
-         for(int m=1;m < M;m++)
-         {   
-	   xnew  = (theta[m-1]+theta[m+1])/(2.+h*h*act);
-	   epsilon += (xnew-theta[m])*(xnew-theta[m]);
-	   theta[m] = xnew;
-         }
-
-	 //Last row
-	 xnew = theta[M-1]; 
-	 epsilon += (xnew-theta[M])*(xnew-theta[M]);
-	 theta[M]=  xnew; 
-
-	 iter=iter+1;     
-       }while((sqrt(epsilon) > toler) && (iter < itermax) );
-
-    if(iter<itermax)
-      cout << "M="<<M<<"  Convergence in "<<iter<<" iterations"<<endl;
-    else
-      {
-	cerr << "NOT CONVERGING in "<<itermax<<" iterations "<<
-	  "||dx||="<<sqrt(epsilon)<<endl;
-	status=1;
-      }
- */
- /*if(useL2norm){
-   // Gauss-Seidel
-  // epsilon=sqrt(int((x^{k+1}-x^{k})^2) (a first order approximation of L2 norm has been used)
-  // Stopping criteria epsilon<=toler
-  
-  int iter=0;
-  double xnew, epsilon;
-     do
-       { epsilon=0.;
-
-	 // first M-1 row of linear system
-         for(int m=1;m < M;m++)
-         {   
-	   xnew  = (theta[m-1]+theta[m+1])/(2.+h*h*act);
-	   
-	   //internal nodes have weight h
-	   epsilon += h*(xnew-theta[m])*(xnew-theta[m]);
-	   theta[m] = xnew;
-         }
-
-	 //Last row
-	 xnew = theta[M-1]; 
-	 
-	 //last node has weight h/2
-	 epsilon += h/2*(xnew-theta[M])*(xnew-theta[M]);
-	 theta[M]=  xnew; 
-
-	 iter=iter+1;     
-       }while((sqrt(epsilon) > toler) && (iter < itermax) );
-
-    if(iter<itermax)
-      cout << "M="<<M<<"  Convergence in "<<iter<<" iterations"<<endl;
-    else
-      {
-	cerr << "NOT CONVERGING in "<<itermax<<" iterations "<<
-	  "||dx||="<<sqrt(epsilon)<<endl;
-	status=1;
-      }
- } else {
- 
- // Gauss-Seidel
-  // epsilon=sqrt(int((x^{k+1}-x^{k})^2+int((x'^{k+1}-x'^{k})^2) (a first order approximation of H1 norm has been used)
-  // Stopping criteria epsilon<=toler
-  
-  int iter=0;
-  double epsilon;
-  auto theta_prov=theta;
-     do
-       { epsilon=0.;
-
-	 // first M-1 row of linear system
-         for(int m=1;m < M;m++)
-         {   
-	   theta_prov[m]  = (theta_prov[m-1]+theta_prov[m+1])/(2.+h*h*act);
-	   
-	   //internal nodes have weight h
-	   epsilon += h*(theta_prov[m]-theta[m])*(theta_prov[m]-theta[m]);
-         }
-
-	 //Last row
-	 theta_prov[M] = theta[M-1]; 
-	//last node has weight h/2
-	 epsilon += h/2*(theta_prov[M]-theta[M])*(theta_prov[M]-theta[M]);
-	  
-	 
-	 // computation of gradient
-	 std::vector<double> der(M);
-	 for(int i=0; i<M; ++i){
-	 	der[i] = ((theta_prov[i+1]-theta_prov[i])-(theta[i+1]-theta[i]))/h;
-	 	}
-	 // using rectangle quadrature formula
-	          
-	 // all medium points have weight h
-	 for(int m=0;m<M;++m){
-	 	epsilon+=h*der[m]*der[m];
-	 	}
-	 theta=theta_prov;
-	 iter=iter+1;
-       }while((sqrt(epsilon) > toler) && (iter < itermax) );
-
-    if(iter<itermax)
-      cout << "M="<<M<<"  Convergence in "<<iter<<" iterations"<<endl;
-    else
-      {
-	cerr << "NOT CONVERGING in "<<itermax<<" iterations "<<
-	  "||dx||="<<sqrt(epsilon)<<endl;
-	status=1;
-      }
- }*/
-
  // Analitic solution
 
     vector<double> thetaa(M+1);
@@ -260,4 +145,5 @@ int main(int argc, char** argv)
        "w l title 'uex'"<<std::endl;
      f.close();
      return status;
+     }
 }
