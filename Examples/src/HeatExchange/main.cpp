@@ -1,3 +1,12 @@
+////// This file has been modified by Alberto Chiappa, matr. 8854468 \\\\\\\
+
+// Here is the solution to challenge 1.3. The tridiagonal matrix representing 
+// the finite elements problem has been built directly and stored inside three vectors.
+// Thomas algorithm has been implemented to solve the system directly.
+
+
+
+
 #include <iostream> // input output
 #include <cmath> // (for sqrt)
 #include <vector>
