@@ -52,9 +52,10 @@ int main(int argc, char** argv)
   // Transfer parameters to local variables
   // I use references to save memory (not really an issue here, it is just
   // to show a possible  use of references)
-  const int&    itermax= param.itermax;   //max number of iteration for Gauss-Siedel
-  const double& toler=param.toler;   // Tolerance for stopping criterion
-  const int& useL2norm=param.useL2norm; // Norm used to compare increment between iterations
+  
+  //const int&    itermax= param.itermax;   //max number of iteration for Gauss-Siedel
+  //const double& toler=param.toler;   // Tolerance for stopping criterion
+  //const int& useL2norm=param.useL2norm; // Norm used to compare increment between iterations
   // Here I use auto (remember that you need const and & if you want constant references)
   const auto& L= param.L;  // Bar length
   const auto& a1=param.a1; // First longitudinal dimension
