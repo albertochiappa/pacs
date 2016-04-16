@@ -79,7 +79,7 @@ int main(int argc, char** argv)
   // and to have an efficient code
   
   const double T=1.;
-  const int Nt=10.;
+  const int Nt=11.;
   const double dt=T/Nt;
   const double Tinit=Te;
   const double hp=2.*hc*(a1+a2)/(a1*a2);
@@ -96,6 +96,7 @@ int main(int argc, char** argv)
   // Solution vector
   std::vector<double> theta(M+1,Tinit);
   for(int i=0;i<Nt;i++){
+  std::cout<<"Iterazione "<<i<<std::endl;
   // Adjusting theta to solve the system
   theta[0]-=(To-Te)*k*dt/(h*h);
   theta[M]=0;
@@ -132,18 +133,20 @@ int main(int argc, char** argv)
        {
 	 // \t writes a tab 
          //f<<m*h*L<<"\t"<<Te*(1.+theta[m])<<"\t"<<thetaa[m]<<endl;
-         f<<m*h*L<<"\t"<<theta[m]+Te<<"\t"<<thetaa[m]<<endl;
+         f<<m*h<<"\t"<<theta[m]+Te<<"\t"<<thetaa[m]<<endl;
 	 // An example of use of tie and tuples!
          
 	 std::tie(coor[m],sol[m],exact[m])=
 	   //std::make_tuple(m*h*L,Te*(1.+theta[m]),thetaa[m]);
-	   std::make_tuple(m*h*L,theta[m]+Te,thetaa[m]);
+	   std::make_tuple(m*h,theta[m]+Te,thetaa[m]);
        }
      // Using temporary files (another nice use of tie)
+     cout<<i%10<<endl;
+     if(!(i%10)
      gp<<"plot"<<gp.file1d(std::tie(coor,sol))<<
-       "w lp title 'uh',"<< gp.file1d(std::tie(coor,exact))<<
-       "w l title 'uex'"<<std::endl;
+       "w lp title 'uh',"<<std::endl;
+        //gp.file1d(std::tie(coor,exact))<<"w l title 'uex'"<<std::endl;
      f.close();
-     return status;
+     //return status;
      }
 }
