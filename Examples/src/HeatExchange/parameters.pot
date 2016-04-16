@@ -24,3 +24,5 @@ hc=200.0e-6
 M=11
 # Name of the output
 outname=result.dat
+# Where do you want to have the result? (0 for a .dat file, 1 for a plot, 2 for both)
+where_result=2

@@ -30,6 +30,8 @@ struct parameters
   int M;
   //! Name of the output file
   std::string outname;
+  //! Where the result are stored
+  int where_result;
   //! Constructor takes default values
   parameters():
     itermax(1000000),
@@ -43,7 +45,8 @@ struct parameters
     k(0.164),
     hc(1.e-6*200.),
     M(100),
-    outname("result.dat")
+    outname("result.dat"),
+    where_result(2)
   {}
 };
 //! Prints parameters

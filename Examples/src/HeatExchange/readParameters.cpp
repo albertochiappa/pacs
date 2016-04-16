@@ -34,6 +34,7 @@ parameters readParameters(std::string const & filename,bool verbose)
   values.hc=ifile("hc",defaults.hc);
   values.M=ifile("M",defaults.M);
   values.outname=ifile("outname", defaults.outname.c_str());
+  values.where_result=ifile("where_result", defaults.where_result);
  
   if(verbose)
     {

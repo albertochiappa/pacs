@@ -1,3 +1,12 @@
+/////========= This file has been modified by Alberto Chiappa, matr. 854468 ==========\\\\\\
+
+// Here can be found the solutions to both challenge 1.1 and challenge 1.2. The parameter to
+// change the name of the output file has been added to parameters.pot and the file script.sh
+// can be run to see how the change from L2 to H1 norm influences the number of iterations
+// necessary in order to reach convergence. Also the possibility to choose whether to have the
+// results in a .dat file or plotted (or both) has been added.
+
+
 #include <iostream> // input output
 #include <cmath> // (for sqrt)
 #include <vector>
@@ -5,6 +14,9 @@
 #include "readParameters.hpp"
 #include "GetPot.hpp"
 #include "gnuplot-iostream.hpp"// interface with gnuplot
+#define FILE 0
+#define PLOT 1
+#define FILE_AND_PLOT 2
 /*!
   @file main.cpp
   @brief Temperature distribution in a 1D bar.
@@ -65,6 +77,7 @@ int main(int argc, char** argv)
   const auto& hc=param.hc; // Convection coefficient
   const auto&    M=param.M; // Number of grid elements
   const auto& outname=param.outname; // Name of the output
+  const auto& where_result=param.where_result; // How to have the result
   //! Precomputed coefficient for adimensional form of equation
   const auto act=2.*(a1+a2)*hc*L*L/(k*a1*a2);
 
@@ -210,6 +223,7 @@ int main(int argc, char** argv)
      for(int m=0;m <= M;m++)
        thetaa[m]=Te+(To-Te)*cosh(sqrt(act)*(1-m*h))/cosh(sqrt(act));
 
+	
      // writing results with format
      // x_i u_h(x_i) u(x_i) and lauch gnuplot 
 
@@ -217,23 +231,32 @@ int main(int argc, char** argv)
      std::vector<double> coor(M+1);
      std::vector<double> sol(M+1);
      std::vector<double> exact(M+1);
+    	for(unsigned int m=0;m<=M;m++){
+    		// An example of use of tie and tuples!
+         
+	 	std::tie(coor[m],sol[m],exact[m])=
+	   	std::make_tuple(m*h*L,Te*(1.+theta[m]),thetaa[m]);
+	   	}
 
+if(where_result==FILE || where_result==FILE_AND_PLOT){
      cout<<"Result file: "<<outname<<endl;
      //const char* outname="result.dat";
      ofstream f(outname);
-     for(int m = 0; m<= M; m++)
+     for(unsigned int m = 0; m<= M; m++)
        {
 	 // \t writes a tab 
          f<<m*h*L<<"\t"<<Te*(1.+theta[m])<<"\t"<<thetaa[m]<<endl;
-	 // An example of use of tie and tuples!
-         
-	 std::tie(coor[m],sol[m],exact[m])=
-	   std::make_tuple(m*h*L,Te*(1.+theta[m]),thetaa[m]);
+	 
+       		}
+       f.close();
        }
+if(where_result==PLOT || where_result==FILE_AND_PLOT){
      // Using temporary files (another nice use of tie)
      gp<<"plot"<<gp.file1d(std::tie(coor,sol))<<
        "w lp title 'uh',"<< gp.file1d(std::tie(coor,exact))<<
        "w l title 'uex'"<<std::endl;
-     f.close();
+       }
+     
      return status;
+     
 }
