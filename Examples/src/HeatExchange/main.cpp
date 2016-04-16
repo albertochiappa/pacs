@@ -2,7 +2,7 @@
 
 // Here can be found the solutions to both challenge 1.1 and challenge 1.2. The parameter to
 // change the name of the output file has been added to parameters.pot and the file script.sh
-// can be run to see how the change from L2 to H1 norm influences the number of iterations
+// can be run to see how switching from L2 to H1 norm influences the number of iterations
 // necessary in order to reach convergence. Also the possibility to choose whether to have the
 // results in a .dat file or plotted (or both) has been added.
 
