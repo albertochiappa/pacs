@@ -21,6 +21,6 @@ k=0.164
 # Convection coefficient
 hc=200.0e-6
 # Number of elements
-M=11
+M=101
 # Name of the output
 outname=result.dat
