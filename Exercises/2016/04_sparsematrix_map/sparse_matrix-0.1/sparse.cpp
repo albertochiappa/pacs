@@ -143,4 +143,4 @@ operator* (const matrix& A, const sparse_matrix& B)
   
 };
 
-#endif
+//#endif
