@@ -59,7 +59,7 @@ The weak form of equation \eqref{eq:formaforte} reads:
 
 Using integration by parts we get
 \begin{equation*}
--\Int{0}{1} (a(x)\ u')' \varphi \,dx=\Int{0}{1} u' \varphi' \,dx- \trace{\varphi u'}{0}^{1}=\Int{0}{1} u' \varphi'  \,dx
+-\Int{0}{1} (a(x)\ u')' \varphi \,dx=\Int{0}{1} a(x)\ u' \varphi' \,dx- \trace{a(x)\ \varphi u'}{0}^{1}=\Int{0}{1} a(x)\ u' \varphi'  \,dx
 \end{equation*}
 
 \end{frame}
@@ -91,7 +91,7 @@ u_{h} = \Sum{j=1}{N_h} u_{j}\varphi_{j} \Rightarrow u_{h}'= \Sum{j=1}{N_h} u_{j}
 
 Equation \ref{eq:galerkin}$_{2}$ becomes:
 \begin{equation*}
-\Sum{j=1}{N_h} u_{j} \Int{0}{1} \varphi_{i}'\varphi_{j}' \,dx = \Int{0}{1} \varphi_{i} \,dx \quad i=1,\ldots,N_h
+\Sum{j=1}{N_h} u_{j} \Int{0}{1} a(x)\ \varphi_{i}'\varphi_{j}' \,dx = \Int{0}{1}f(x)\ \varphi_{i} \,dx \quad i=1,\ldots,N_h
 \end{equation*}
 
 We therefore get a linear algebraic system of the form
@@ -217,6 +217,19 @@ this process is called assembly of the coefficient matrix
 \end{itemize}
 \item adapt the fem1d code to allow the user to specify the quadrature rule at runtime
 \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Implementation in {\tt C++} }
+\only<1-2>{file {\tt fem1d.h}}
+\only<3-6>{file {\tt fem1d.cpp}}
+\tiny
+\only<1>{\lstinputlisting[language=C++, firstline=1, firstnumber=1, lastline=35, numbers=left, numberstyle=\tiny\color{gray}]{../fem1d-0.7/fem1d.h}}
+\only<2>{\lstinputlisting[language=C++, firstline=35, firstnumber=35, lastline=70, numbers=left, numberstyle=\tiny\color{gray}]{../fem1d-0.7/fem1d.h}}
+\only<3>{\lstinputlisting[language=C++, firstline=1, firstnumber=1, lastline=35, numbers=left, numberstyle=\tiny\color{gray}]{../fem1d-0.7/fem1d.cpp}}
+\only<4>{\lstinputlisting[language=C++, firstline=35, firstnumber=35, lastline=70, numbers=left, numberstyle=\tiny\color{gray}]{../fem1d-0.7/fem1d.cpp}}
+\only<5>{\lstinputlisting[language=C++, firstline=70, firstnumber=70, lastline=105, numbers=left, numberstyle=\tiny\color{gray}]{../fem1d-0.7/fem1d.cpp}}
+\only<6>{\lstinputlisting[language=C++, firstline=105, firstnumber=105, lastline=120, numbers=left, numberstyle=\tiny\color{gray}]{../fem1d-0.7/fem1d.cpp}}
 \end{frame}
 
 \end{document}
