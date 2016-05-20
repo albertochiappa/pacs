@@ -20,7 +20,7 @@ std::string help_text = std::string () +
   "-d, --diffusion \"string\"         expression to compute diffusion coefficient\n" +
   "-f, --forcing \"string\"           expression to compute forcing term coefficient\n" +
   "-n, --nnodes <value>             number of triangulation nodes\n" +
-  "-q, --quadrature-rule \"string\"   name of the quadrature rule to use\n";
+  "-q, --quadrature-rule \"string\"   name of a dynamically loadable object definig the quadrature algorithm\n";
   
 class coeff
 {
