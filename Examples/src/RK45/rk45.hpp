@@ -27,7 +27,7 @@ namespace ODE
     @param error the estimated error
     @return the computed value for y
   */
-  double rk45_step(std::function<double (double const &, double const &)> const & dy,double const & y0,double const & h, double & error);
+  double rk45_step(std::function<double (double const &, double const &)> const & dy,double const & y0,   double const & t0, double const & h, double & error);
 
 
   //! Adaptive RK
