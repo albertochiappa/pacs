@@ -8,7 +8,7 @@ int main()
     using namespace Eigen;
     using namespace Utility;
 
-    int i = 42;
+    constexpr int i = 42;
     std::cout << "mean(7,i):   " << mean(7,i) << std::endl;
     double f1 = 3.4;
     double f2 = -6.7;
@@ -37,4 +37,7 @@ int main()
     std::complex<double> im(0.,1.0);
     std::complex<double> biz(1.0,1.0);
     std::cout<<Sum(one,im,biz,10.0)<<std::endl;
+    std::cout<<Mean(1.,1.,1.,1.)<<std::endl;
+    std::cout<<Mean(im,biz,one,1.0)<<std::endl;
+    
 }

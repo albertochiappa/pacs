@@ -88,7 +88,7 @@ namespace LinearAlgebra{
     MyMat0(MyMat0<S> const & m);
 #ifndef NOMOVE
 #warning "Move constructor active"
-    //! Move copy constructor (only if matrix is of the same type)
+    //! Move constructor (only if matrix is of the same type)
     MyMat0(MyMat0<T>&& m);
 #endif
     //! Copy assignment operator
@@ -104,7 +104,7 @@ namespace LinearAlgebra{
     MyMat0<T> & operator =(MyMat0<S> const & m);
 #ifndef NOMOVE
 #warning "Move copyassignement active"
-    //! Copy assignement with move semantic. Only for matrices of same type.
+    //! Move assignement with move semantic. Only for matrices of same type.
     MyMat0<T> & operator =(MyMat0<T>&& m);
 #endif
     //! Resizing the matrix.
@@ -216,6 +216,7 @@ namespace LinearAlgebra {
   template <StoragePolicySwitch T>
   MyMat0<T>::MyMat0(MyMat0<T>&& m):nr(m.nr),nc(m.nc),data(std::move(m.data))
   {
+    // Setting to zero rows and columns
     m.nr=0;m.nc=0;
   }
 #endif
@@ -238,6 +239,7 @@ namespace LinearAlgebra {
   template <StoragePolicySwitch T>
   MyMat0<T> & MyMat0<T>::operator =(MyMat0<T>&& m){
     // std containers implement move semantic, so I just move
+    // I move nc and nr even if I gain nothing moving int!
     nr=std::move(m.nr);
     nc=std::move(m.nc);
     data=std::move(m.data);

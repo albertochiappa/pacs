@@ -28,27 +28,37 @@ struct Pow<X,0>
 namespace implementation
 {
   //! Implementation using constexpr functions
-  /*!
-    This implementation works also if the argument x is not a integral constant.
-    The optimization is up to the compiler since constexpr is only a "suggestion"
-    to the compiler that the expression may be optimized if the argument is a 
-    literal or a constant value.
+  /*!  This implementation works also if the argument x is not a
+    integral constant.  The optimization is up to the compiler since
+    constexpr is only a "suggestion" to the compiler that the
+    expression may be optimized if the argument is a literal or a
+    constant value.
     
     Note the use of integral_constant to select the correct overloaded
     function via tag dispatching.
 
-    This example wants to show that by using the new constexpr construction one may in some cases
-    avoit template metaprogramming.
+    This example wants to show that by using the new constexpr
+    construction one may in some cases avoid template metaprogramming.
     
   */
+  // A class templates parametrized by an int
+  /*
+  template <unsigned int J>
+  struct
+  IntToType{};
+  */
+  // In c++11 I ca use std::integral_constant
   template<unsigned int N>
-  constexpr long int pow(const long int x, std::integral_constant<unsigned int, N>)
+  using IntToType=std::integral_constant<unsigned int,N>;
+
+  template<unsigned int N>
+  constexpr long int pow(const long int x, implementation::IntToType<N>)
   {
-    return pow(x, std::integral_constant<unsigned int, N-1>{} ) * x;
+    return pow(x, IntToType<N-1>{} ) * x;
   }
   //! Overload for N=0
   template<>
-  constexpr long int pow(const long int  x, std::integral_constant<unsigned int, 0>)
+  constexpr long int pow(const long int  x, implementation::IntToType<0>)
   {
     return 1;
   }
@@ -59,7 +69,7 @@ namespace implementation
   template<int N>
   constexpr long int pow(const long int  x)
   {
-    return implementation::pow(x, std::integral_constant<unsigned int, N>{} );
+    return implementation::pow(x, implementation::IntToType<N>{} );
   }
 
 #endif
