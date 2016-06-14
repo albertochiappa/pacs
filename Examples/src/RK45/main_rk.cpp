@@ -1,3 +1,11 @@
+// Soluzione della challenge 3: in questo nuovo main utiliziamo la classe generic_rk
+// in sostituzione della funzione rk45, la quale riceve come parametro template 
+// un oggetto contenente il butcher array e dei metodi (geta, getb, getc) per restituire i suoi
+// elementi. La classe generic_rk contiene il metodo solve, il quale esegue l'algoritmo vero e proprio.
+// Esso fa uso della classe rk_step, che riceve anch'essa come template lo stesso oggetto relativo
+// al metodo di Runge-Kutta prescelto, in modo da modificare il proprio funzionamento.
+
+
 #include "rk45.hpp"
 #include<iostream>
 #include <fstream>

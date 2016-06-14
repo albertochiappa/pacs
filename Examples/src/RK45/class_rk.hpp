@@ -42,6 +42,9 @@ class rk45_butcher{
 		double getc(int i){
 			return C[i-2];
 		};
+		int rank(){
+			return A.size();
+		};
 		
 };
 
@@ -55,19 +58,38 @@ class rk45_butcher{
    rk45_butcher butch
    )
   {
-   
-    
-    double F1 = h * f(t0, y0);
-    double F2 = h * f(t0 + butch.getc(2) * h, y0 + butch.geta(2,1) * F1);
-    double F3 = h * f(t0 + butch.getc(3) * h, y0 + butch.geta(3,1) * F1 + butch.geta(3,2) * F2);
-    double F4 = h * f(t0 + butch.getc(4) * h, y0 + butch.geta(4,1) * F1 + butch.geta(4,2) * F2 + butch.geta(4,3) * F3);
-    double F5 = h * f(t0 + butch.getc(5)* h, y0 + butch.geta(5,1) * F1 + butch.geta(5,2) * F2 + butch.geta(5,3) * F3 + butch.geta(5,4) * F4 );
-    double F6 = h * f(t0 + butch.getc(6) * h, y0 + butch.geta(6,1) * F1 + butch.geta(6,2) * F2 + butch.geta(6,3) * F3 + butch.geta(6,4) * F4 + butch.geta(6,5) * F5);
-
-    double y4 =   y0 + butch.getb(4,1) * F1 + butch.getb(4,3) * F3 + butch.getb(4,4) * F4 + butch.getb(4,5) * F5;
-    double y5 =   y0 + butch.getb(5,1) * F1 + butch.getb(5,3) * F3 + butch.getb(5,4) * F4 + butch.getb(5,5) * F5 + butch.getb(5,6) * F6;
-    error = std::abs(y5 - y4);
-    return y5;
+   	vector<double> F(6);
+   	
+   	double xx; // posizione in cui verrà valutata F
+   	F[0]=h * f(t0, y0);
+   	for (int i=1;i<=butch.rank();++i){
+   		xx=y0;
+   		for(int j=1;j<=i;++j){
+   			xx+=butch.geta(i+1,j)*F[j-1];
+   		}
+   		F[i]=h*f(t0+butch.getc(i+1)*h, xx);
+   	}
+   	
+    /*
+    F[0] = h * f(t0, y0);
+    F[1] = h * f(t0 + butch.getc(2) * h, y0 + butch.geta(2,1) * F[0]);
+    F[2] = h * f(t0 + butch.getc(3) * h, y0 + butch.geta(3,1) * F[0] + butch.geta(3,2) * F[1]);
+    F[3] = h * f(t0 + butch.getc(4) * h, y0 + butch.geta(4,1) * F[0] + butch.geta(4,2) * F[1] + butch.geta(4,3) * F[2]);
+    F[4] = h * f(t0 + butch.getc(5)* h, y0 + butch.geta(5,1) * F[0] + butch.geta(5,2) * F[1] + butch.geta(5,3) * F[2] + butch.geta(5,4) * F[3] );
+    F[5] = h * f(t0 + butch.getc(6) * h, y0 + butch.geta(6,1) * F[0] + butch.geta(6,2) * F[1] + butch.geta(6,3) * F[2] + butch.geta(6,4) * F[3] + butch.geta(6,5) * F[4]);
+		*/
+    double y_test =   y0;
+    for(int i=1;i<=butch.rank();++i){
+    	y_test += butch.getb(butch.rank()-1,i) * F[i-1];
+    };
+    // + butch.getb(4,1) * F1 + butch.getb(4,3) * F3 + butch.getb(4,4) * F4 + butch.getb(4,5) * F5;
+    double y_sol =   y0;
+    for(int i=1;i<=butch.rank()+1;++i){
+    	y_sol += butch.getb(butch.rank(),i) * F[i-1];
+    };
+    // + butch.getb(5,1) * F1 + butch.getb(5,3) * F3 + butch.getb(5,4) * F4 + butch.getb(5,5) * F5 + butch.getb(5,6) * F6;
+    error = std::abs(y_test - y_sol);
+    return y_sol;
   }
   
 template<typename rkType>
