@@ -4,7 +4,42 @@
 #include <vector>
 using namespace std;
 
+class rk23_butcher{
 
+		vector<vector<double>> A;
+		vector<vector<double>> B;
+		vector<double> C;
+	public:
+		rk23_butcher(){
+			    vector <double> a={1./2.};
+			    A.push_back(a);
+			    C.push_back(1./2);
+			    a={0., 3./4.};
+			    A.push_back(a);
+    			C.push_back(3./4.);
+    			a={2./9., 1./3., 4./9.};
+    			A.push_back(a);
+					C.push_back(1);
+					
+					vector <double> b={2./9.,1./3.,4./9.,0.};
+  				B.push_back(b);
+  				b={7./24.,1./4.,1./3.,1./8.};
+					B.push_back(b);
+		};
+		double geta(int i,int j){
+			return A[i-2][j-1];
+		};
+		double getb(int i,int j){
+			return B[i-4][j-1];
+		};
+		double getc(int i){
+			return C[i-2];
+		};
+		int rank(){
+			return A.size();
+		};
+		
+};
 class rk45_butcher{
 
 		vector<vector<double>> A;
@@ -94,7 +129,7 @@ class rk45_butcher{
   
 template<typename rkType>
 
-class generic_rk: public rkType{ // vedere se funziona private
+class generic_rk: private rkType{
 	
 	public:
 			std::vector<std::pair<double,double>> solve(

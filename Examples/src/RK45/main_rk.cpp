@@ -1,10 +1,19 @@
 // Soluzione della challenge 3: in questo nuovo main utiliziamo la classe generic_rk
 // in sostituzione della funzione rk45, la quale riceve come parametro template 
-// un oggetto contenente il butcher array e dei metodi (geta, getb, getc) per restituire i suoi
-// elementi. La classe generic_rk contiene il metodo solve, il quale esegue l'algoritmo vero e proprio.
-// Esso fa uso della classe rk_step, che riceve anch'essa come template lo stesso oggetto relativo
+// un oggetto contenente il butcher array e dei metodi (geta, getb, getc, rank) per restituire i suoi
+// elementi e l'ordine del metodo. La classe generic_rk contiene il metodo solve, il 
+// quale esegue l'algoritmo vero e proprio.
+// Esso fa uso della funzione rk_step, che riceve anch'essa come template lo stesso oggetto relativo
 // al metodo di Runge-Kutta prescelto, in modo da modificare il proprio funzionamento.
 
+// Ho implementato la classe rk_23, che può essere alternata a rk_45, ma è semplice crearne altre
+// sullo stesso stile. La funzione rk_step è stata scritta in modo da adattarsi alle diverse dimensioni
+// dei butcher array.
+
+// Comandi necessari all'esecuzione del codice: (le modifiche sono completamente contenute nell'header e nel main)
+// $ g++ -std=c++11 -c main_rk.cpp
+// $ g++ -std=c++11 -o main_rk main_rk.cpp
+// $ ./main_rk
 
 #include "rk45.hpp"
 #include<iostream>
@@ -24,9 +33,12 @@ int main()
   double h_init=0.2;
   double errorDesired=1.e-7;
   int status;
-  generic_rk<rk45_butcher> RK45;
+  
+  // Here are tested two different Runge Kutta methods
+  //generic_rk<rk45_butcher> RK;
+  generic_rk<rk23_butcher> RK;
   auto result= 
-    RK45.solve(fun,t0,T,y0,h_init,(T-t0)/4.,errorDesired,status,10000);
+    RK.solve(fun,t0,T,y0,h_init,(T-t0)/4.,errorDesired,status,10000);
   ofstream file("result.dat");
   for (auto v : result)
     file<<v.first<<" "<<v.second<<std::endl;
